@@ -8,6 +8,7 @@ public class DbConnection {
     private static DbConnection instance = null;
     private Connection connection = null;
 
+
     private DbConnection() {
         try {
             Class.forName("org.postgresql.Driver");
