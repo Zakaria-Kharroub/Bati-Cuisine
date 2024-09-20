@@ -15,9 +15,6 @@ public class Composant {
         this.projet = projet;
     }
 //    getters
-    public int getId() {
-        return id;
-    }
 
     public String getName() {
         return name;

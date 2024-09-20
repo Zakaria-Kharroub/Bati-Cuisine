@@ -1,6 +1,9 @@
 import config.DbConnection;
 import domaine.Client;
+import domaine.Projet;
+import domaine.ProjetStatus;
 import service.ClientService;
+import service.ProjectService;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -12,6 +15,7 @@ public class Main {
         dbConnection.getConnection();
 
         ClientService clientService = new ClientService();
+        ProjectService projectService = new ProjectService();
         Scanner inp = new Scanner(System.in);
 
         int choix;
@@ -22,7 +26,7 @@ public class Main {
                     manageClients(clientService, inp);
                     break;
                 case 2:
-                    System.out.println("Gestion des projets (non implémenté)");
+                    manageProjects(projectService, inp, clientService);
                     break;
                 case 3:
                     System.out.println("Merci et au revoir");
@@ -63,9 +67,6 @@ public class Main {
                     deleteClient(clientService, inp);
                     break;
                 case 5:
-                    updateClient(clientService, inp);
-                    break;
-                case 6:
                     System.out.println("retour au menu principal");
                     break;
                 default:
@@ -76,10 +77,38 @@ public class Main {
     }
 
 
+    private static void manageProjects(ProjectService projectService, Scanner inp, ClientService clientService) throws SQLException {
+        int choixProject;
+        do {
+            choixProject = projectMenu(inp);
+            switch (choixProject) {
+                case 1:
+                    addProject(projectService, inp, clientService);
+                    break;
+                case 2:
+//                    System.out.println('detail projet by name');
+                    break;
+                case 3:
+//                    System.out.println('delete projet');
+                    break;
+                case 4:
+//                   System.out.println('update projet');
+                    break;
+                case 5:
+                    System.out.println("retour au menu principal");
+                    break;
+                default:
+                    System.out.println("choix invalide");
+                    break;
+            }
+        } while (choixProject != 5);
+    }
+
+
 
     private static int clientMenu(Scanner inp) {
         System.out.println("+--------------------------------------------------------------+");
-        System.out.println("|                    Menu Principal                            |");
+        System.out.println("|                    Menu Client                               |");
         System.out.println("+--------------------------------------------------------------+");
         System.out.println("| 1 - ajouter client                                           |");
         System.out.println("| 2 - afficher tous les clients                                |");
@@ -87,6 +116,20 @@ public class Main {
         System.out.println("| 4 - supprimer un client                                      |");
         System.out.println("| 5 - modifier un client                                       |");
         System.out.println("| 6 - exit                                                     |");
+        System.out.println("+--------------------------------------------------------------+");
+
+        return inp.nextInt();
+    }
+
+    private static int projectMenu(Scanner inp) {
+        System.out.println("+--------------------------------------------------------------+");
+        System.out.println("|                    Menu Project                              |");
+        System.out.println("+--------------------------------------------------------------+");
+        System.out.println("| 1 - ajouter projet                                           |");
+        System.out.println("| 2 - detail projet by name                                    |");
+        System.out.println("| 3 - delete projet                                            |");
+        System.out.println("| 4 - update projet                                            |");
+        System.out.println("| 5 - exit                                                     |");
         System.out.println("+--------------------------------------------------------------+");
 
         return inp.nextInt();
@@ -189,6 +232,32 @@ public class Main {
             }
         } catch (SQLException e) {
             System.out.println("error d'update" + e.getMessage());
+        }
+    }
+
+    private static void addProject(ProjectService projectService, Scanner inp, ClientService clientService) throws SQLException {
+        System.out.println("enter name de project");
+        String projectName = inp.next();
+
+        System.out.println("enter name de clien pour ce project");
+        String clientName = inp.next();
+
+        System.out.println("enter marge benifit");
+        double margeBenifit= inp.nextDouble();
+
+        try {
+
+            Client client= clientService.findByname(clientName).orElseThrow(
+                    () -> new IllegalArgumentException("client not found")
+            );
+
+            Projet project =new Projet(projectName, margeBenifit, 0, ProjetStatus.INPROGRESS,client, null);
+            projectService.addProject(project);
+            System.out.println("projet ajouter succes");
+        } catch (SQLException e) {
+            System.out.println("error de ajouter projet: " +e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
         }
     }
 }

@@ -2,7 +2,6 @@ package domaine;
 
 public class Material extends Composant{
 
-    private int id;
     private double coutUnitaire;
     private double quantite;
     private double coutTransport;

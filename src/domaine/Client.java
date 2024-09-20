@@ -1,5 +1,8 @@
 package domaine;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Client {
 
     private int id;
@@ -7,6 +10,9 @@ public class Client {
     private String phone;
     private String address;
     private boolean isProfessional;
+    List<Projet> projets;
+
+
 
     public Client(String name, String phone, String address, boolean isProfessional) {
 //        this.id = id;
@@ -14,6 +20,9 @@ public class Client {
         this.phone = phone;
         this.address = address;
         this.isProfessional = isProfessional;
+        projets = new ArrayList<>();
+
+
     }
 
     public int getId() {
@@ -55,4 +64,13 @@ public class Client {
     public void setIsProfessional(boolean professional) {
         isProfessional = professional;
     }
+
+    public List<Projet> getProjets() {
+        return projets;
+    }
+
+    public void setProjets(List<Projet> projets) {
+        this.projets = projets;
+    }
 }
+
