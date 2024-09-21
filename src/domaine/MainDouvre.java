@@ -2,20 +2,24 @@ package domaine;
 
 public class MainDouvre extends Composant{
     private int id;
+    private String typeOuvrier;
     private double tauxHoraire;
     private double heuresTravail;
 
     private double productiviteOuvrier;
 
-    public MainDouvre(String name, String composantType, double tauxTva, Projet projet, double tauxHoraire, double heuresTravail, double productiviteOuvrier) {
+    public MainDouvre(String name, String composantType, double tauxTva, Projet projet,String typeOuvrier ,double tauxHoraire, double heuresTravail, double productiviteOuvrier) {
         super(name, composantType, tauxTva, projet);
         this.tauxHoraire = tauxHoraire;
         this.heuresTravail = heuresTravail;
         this.productiviteOuvrier = productiviteOuvrier;
+        this.typeOuvrier = typeOuvrier;
     }
 //    geters
-    public int getId() {
-        return id;
+
+
+    public String getTypeOuvrier() {
+        return typeOuvrier;
     }
 
     public double getTauxHoraire() {
@@ -31,8 +35,10 @@ public class MainDouvre extends Composant{
     }
 
 //    setters
-    public void setId(int id) {
-        this.id = id;
+
+
+    public void setTypeOuvrier(String typeOuvrier) {
+        this.typeOuvrier = typeOuvrier;
     }
 
     public void setTauxHoraire(double tauxHoraire) {

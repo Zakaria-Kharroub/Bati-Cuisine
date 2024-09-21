@@ -9,6 +9,11 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
+
+import domaine.Material;
+import domaine.MainDouvre;
+import java.util.ArrayList;
+
 public class Main {
     public static void main(String[] args) throws SQLException {
         DbConnection dbConnection = DbConnection.getInstance();
@@ -235,29 +240,219 @@ public class Main {
         }
     }
 
+
+
     private static void addProject(ProjectService projectService, Scanner inp, ClientService clientService) throws SQLException {
-        System.out.println("enter name de project");
+        System.out.println("enter name de projet");
         String projectName = inp.next();
 
-        System.out.println("enter name de clien pour ce project");
+        System.out.println("enter name de client pour associer a ce projet");
         String clientName = inp.next();
 
         System.out.println("enter marge benifit");
-        double margeBenifit= inp.nextDouble();
+        double margeBenifit = inp.nextDouble();
 
         try {
-
-            Client client= clientService.findByname(clientName).orElseThrow(
+            Client client = clientService.findByname(clientName).orElseThrow(
                     () -> new IllegalArgumentException("client not found")
             );
 
-            Projet project =new Projet(projectName, margeBenifit, 0, ProjetStatus.INPROGRESS,client, null);
-            projectService.addProject(project);
-            System.out.println("projet ajouter succes");
+            Projet project =new Projet(projectName, margeBenifit, 0, ProjetStatus.INPROGRESS, client, new ArrayList<>());
+            int projectId = projectService.addProject(project);
+
+            boolean addMoreComposants=true;
+            while (addMoreComposants) {
+                System.out.println("vous voulez ajouter un composant a ce projet ? \n oui/non");
+                String response = inp.next().toLowerCase();
+                if (response.equals("oui")) {
+                    addComposantToProject(projectService, inp, projectId);
+                } else {
+                    addMoreComposants= false;
+                }
+            }
+
+            System.out.println("Projet ajouté avec succès");
         } catch (SQLException e) {
-            System.out.println("error de ajouter projet: " +e.getMessage());
+            System.out.println("Erreur lors de l'ajout du projet: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
     }
+
+    private static void addComposantToProject(ProjectService projectService, Scanner inp, int projectId) throws SQLException {
+        System.out.println("enter type de composant (1 - materiel, 2 - main d'œuvre):");
+        int componentType= inp.nextInt();
+
+        System.out.println("enter name de composant");
+        String componentName = inp.next();
+
+        System.out.println("enter taux TVA:");
+        double tauxTva = inp.nextDouble();
+
+        if (componentType == 1) {
+            System.out.println("enter le cout unitaire:");
+            double coutUnitaire =inp.nextDouble();
+
+            System.out.println("enter la quantite:");
+            double quantite= inp.nextDouble();
+
+            System.out.println("enter cout de transport:");
+            double coutTransport = inp.nextDouble();
+
+            System.out.println("Entrez le coefficient de qualité du matériau (1.0 = standard, > 1.0 = haute qualité)");
+            double coefficientQualite = inp.nextDouble();
+
+            Material material = new Material(componentName, "Matériel", tauxTva, null, coutUnitaire, quantite, coutTransport, coefficientQualite);
+            projectService.addComposantToProject(projectId, material);
+        } else if (componentType == 2) {
+            System.out.println("enter type d'ouvrier (1 - ouvrier de base, 2 - specialiste):");
+            String typeOuvrier = inp.nextInt() == 1 ? "ouvrier de base" : "spécialiste";
+
+            System.out.println("enter taux horaire:");
+            double tauxHoraire = inp.nextDouble();
+
+            System.out.println("enter nombre d'heures de travail:");
+            double heuresTravail = inp.nextDouble();
+
+            System.out.println("Entrez le facteur de productivité (1.0 = standard, > 1.0 = haute productivité)");
+            double productiviteOuvrier = inp.nextDouble();
+
+            MainDouvre mainDouvre = new MainDouvre(componentName, "Main d'œuvre", tauxTva, null, typeOuvrier, tauxHoraire, heuresTravail, productiviteOuvrier);
+            projectService.addComposantToProject(projectId, mainDouvre);
+        }
+
+        System.out.println("composant ajoute avec succes");
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//    private static void addProject(ProjectService projectService, Scanner inp, ClientService clientService) throws SQLException {
+//        System.out.println("enter name de project");
+//        String projectName = inp.next();
+//
+//        System.out.println("enter name de clien pour ce project");
+//        String clientName = inp.next();
+//
+//        System.out.println("enter marge benifit");
+//        double margeBenifit = inp.nextDouble();
+//
+//        try {
+//
+//            Client client = clientService.findByname(clientName).orElseThrow(
+//                    () -> new IllegalArgumentException("client not found")
+//            );
+//
+//            Projet project = new Projet(projectName, margeBenifit, 0, ProjetStatus.INPROGRESS, client, null);
+//            projectService.addProject(project);
+//            System.out.println("projet ajouter succes");
+//        } catch (SQLException e) {
+//            System.out.println("error de ajouter projet: " + e.getMessage());
+//        } catch (IllegalArgumentException e) {
+//            System.out.println(e.getMessage());
+//        }
+//
+//        System.out.println("vous voulez ajouter des composants pour ce projet? \n yes / no");
+//        String reponse = inp.next();
+//        if (reponse.equals("yes")) {
+//            System.out.println("enter type de composant \n 1 - material | 2 - main ouvre");
+//            int typeComposant = inp.nextInt();
+//            if (typeComposant == 1) {
+//                System.out.println("enter name de material");
+//                String nameMaterial = inp.next();
+//
+//                System.out.println("enter taux tva");
+//                double tauxTva = inp.nextDouble();
+//
+//                System.out.println("enter cout unitaire");
+//                double coutUnitaire = inp.nextDouble();
+//
+//                System.out.println("Entrez la quantité de ce matériau (en m²)");
+//                double quantite = inp.nextDouble();
+//
+//                System.out.println("enter cout transport");
+//                double coutTransport = inp.nextDouble();
+//
+//                System.out.println("Entrez le coefficient de qualité du matériau (1.0 = standard, > 1.0 = haute qualité) : 1.1");
+//                double coefficientQualite = inp.nextDouble();
+//
+//                try {
+////                    stocker composants dans list des composants de projet
+//                    System.out.println("material ajouter avec succes");
+//                } catch (SQLException e) {
+//                    System.out.println("error de ajouter material: " + e.getMessage());
+//                }
+////
+//
+//
+//            } else if (typeComposant == 2) {
+//                System.out.println("enter name de main ouvre");
+//                String nameMainOuvre = inp.next();
+//
+//                System.out.println("enter taux tva");
+//                double tauxTva = inp.nextDouble();
+//
+//                System.out.println("Entrez le type de main-d'œuvre \n ( 1 - Ouvrier de base | 2 - Spécialiste");
+//                int choixMainOuvre = inp.nextInt();
+//
+//                if (choixMainOuvre == 1) {
+//                    String typeMainOuvre = "Ouvrier de base";
+//
+//                } else if (choixMainOuvre == 2) {
+//                    String typeMainOuvre = "Spécialiste";
+//                }
+//
+//                System.out.println("Entrez le taux horaire de l'ouvrier (en €/h) : ");
+//                double tauxHoraire = inp.nextDouble();
+//
+//                System.out.println("Entrez le nombre d'heures de travail de l'ouvrier : ");
+//                double heuresTravail = inp.nextDouble();
+//
+//                System.out.println("Entrez le facteur de productivité (1.0 = standard, > 1.0 = haute productivité)");
+//                double productiviteOuvrier = inp.nextDouble();
+//
+//                try {
+////                    stocker composants dans list des composants de projet
+//                    System.out.println("main ouvre ajouter avec succes");
+//                } catch (SQLException e) {
+//                    System.out.println("error de ajouter main ouvre: " + e.getMessage());
+//                }
+//
+//
+//            }
+//        }else if (reponse.equals("no")){
+//            System.out.println("project ajouter avec succes");
+//        }
+//    }
 }

@@ -1,7 +1,9 @@
 package service;
 
 import config.DbConnection;
+import domaine.Composant;
 import domaine.Projet;
+import repository.ComposantRepository;
 import repository.ProjectRepository;
 
 import java.sql.Connection;
@@ -10,14 +12,18 @@ import java.sql.SQLException;
 public class ProjectService {
     private Connection connection = DbConnection.getInstance().getConnection();
     private ProjectRepository projectRepository;
+    private ComposantRepository composantRepository;
 
     public ProjectService() {
         this.projectRepository = new ProjectRepository(connection);
+        this.composantRepository = new ComposantRepository(connection);
     }
 
-    public void addProject(Projet project) throws SQLException {
-        projectRepository.addProject(project);
+    public int addProject(Projet project) throws SQLException {
+        return projectRepository.addProject(project);
     }
 
-
+    public void addComposantToProject(int projectId, Composant composant) throws SQLException {
+        composantRepository.addComposant(composant, projectId);
+    }
 }
