@@ -1,9 +1,12 @@
 package repository;
 
+import domaine.Client;
 import domaine.Projet;
+import domaine.ProjetStatus;
 
 import java.beans.JavaBean;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Optional;
 
 public class ProjectRepository {
@@ -29,6 +32,47 @@ public class ProjectRepository {
             }
         }
     }
+
+    public Optional<Projet> getProjectByName(String projectName) throws SQLException {
+        String query = "SELECT p.id, p.name, p.margeBenifit, p.coutTotal, p.projectstatus, " +
+                "c.id as client_id, c.name as client_name, c.phone, c.address, c.isprofessional " +
+                "FROM projects p " +
+                "JOIN clients c ON p.client_id = c.id " +
+                "WHERE p.name = ?";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, projectName);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    Client client = new Client(
+                            rs.getString("client_name"),
+                            rs.getString("phone"),
+                            rs.getString("address"),
+                            rs.getBoolean("isprofessional")
+                    );
+                    client.setId(rs.getInt("client_id"));
+
+                    Projet projet = new Projet(
+                            rs.getString("name"),
+                            rs.getDouble("margeBenifit"),
+                            rs.getDouble("coutTotal"),
+                            ProjetStatus.valueOf(rs.getString("projectstatus")),
+                            client,
+                            new ArrayList<>()
+                    );
+                    projet.setId(rs.getInt("id"));
+
+                    return Optional.of(projet);
+                }
+            }
+        }
+
+        return Optional.empty();
+    }
+
+
+
 
 
 

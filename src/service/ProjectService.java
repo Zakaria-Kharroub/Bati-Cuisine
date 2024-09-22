@@ -8,6 +8,8 @@ import repository.ProjectRepository;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
 
 public class ProjectService {
     private Connection connection = DbConnection.getInstance().getConnection();
@@ -26,4 +28,9 @@ public class ProjectService {
     public void addComposantToProject(int projectId, Composant composant) throws SQLException {
         composantRepository.addComposant(composant, projectId);
     }
+
+    public Optional<Projet> getProjectByName(String projectName) throws SQLException {
+        return projectRepository.getProjectByName(projectName);
+    }
+
 }
