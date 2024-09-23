@@ -35,7 +35,7 @@ create table materials(
 )inherits (composants);
 
 create table main_douvre(
-
+                            typeOuvrier VARCHAR(255),
                             tauxHoraire DOUBLE PRECISION,
                             heuresTravail DOUBLE PRECISION,
                             productiviteOuvrier DOUBLE PRECISION
