@@ -36,6 +36,7 @@ public class ProjectRepository {
 
 
 
+
     public Optional<Projet> getProjectByName(String projectName) throws SQLException {
         String query = "SELECT p.id, p.name, p.margeBenifit, p.coutTotal, p.projectstatus, " +
                 "c.id as client_id, c.name as client_name, c.phone, c.address, c.isprofessional " +
@@ -85,5 +86,15 @@ public class ProjectRepository {
 //        }
 //    }
 
+
+    public void updateProjectStatus(Projet project) throws SQLException {
+        String query = "UPDATE projects SET projectstatus = ? WHERE id = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setObject(1, project.getProjetStatus(), java.sql.Types.OTHER);
+            preparedStatement.setInt(2, project.getId());
+            preparedStatement.executeUpdate();
+        }
+    }
 
 }

@@ -71,6 +71,9 @@ public class Main {
                     deleteClient(clientService, inp);
                     break;
                 case 5:
+                    updateClient(clientService, inp);
+                    break;
+                case 6:
                     System.out.println("retour au menu principal");
                     break;
                 default:
@@ -93,10 +96,10 @@ public class Main {
                     detailProject(projectService, composanService, inp);
                     break;
                 case 3:
-                    // delete projet
+
                     break;
                 case 4:
-                    // update projet
+                    updateProjectStatus(projectService, inp);
                     break;
                 case 5:
                     System.out.println("retour au menu principal");
@@ -132,7 +135,7 @@ public class Main {
         System.out.println("| 1 - ajouter projet                                           |");
         System.out.println("| 2 - detail projet by name                                    |");
         System.out.println("| 3 - afficher les project existants                           |");
-        System.out.println("| 4 - update projet                                            |");
+        System.out.println("| 4 - update projet status                                     |");
         System.out.println("| 5 - exit                                                     |");
         System.out.println("+--------------------------------------------------------------+");
 
@@ -306,6 +309,7 @@ public class Main {
         }
     }
 
+
     private static void addComposantToProject(ProjectService projectService, Scanner inp, int projectId) throws SQLException {
         System.out.println("enter type de composant (1 - materiel, 2 - main d'œuvre):");
         int componentType= inp.nextInt();
@@ -352,9 +356,6 @@ public class Main {
     }
 
 
-
-
-
     public static void detailProject(ProjectService projectService, ComposanService composanService, Scanner inp) throws SQLException {
         System.out.println("enter name de projet:");
         String projectName = inp.next();
@@ -391,26 +392,63 @@ public class Main {
         }
     }
 
+   public static void updateProjectStatus(ProjectService projectService, Scanner inp) throws SQLException {
+    System.out.println("enter name de projet:");
+    String projectName = inp.next();
 
+    Optional<Projet> projectOpt = projectService.getProjectByName(projectName);
+    if (projectOpt.isPresent()) {
+        Projet project = projectOpt.get();
+        System.out.println("status actuel  projet: " + project.getProjetStatus());
 
+        System.out.println("entrez nouveau status du projet: \n 1 - INPROGRESS, 2 - FINISHED, 3 - CANCELED");
+        int status = inp.nextInt();
+        ProjetStatus newStatus = null;
+        switch (status) {
+            case 1:
+                newStatus = ProjetStatus.INPROGRESS;
+                break;
+            case 2:
+                newStatus = ProjetStatus.FINISHED;
+                break;
+            case 3:
+                newStatus = ProjetStatus.CANCELLED;
+                break;
+            default:
+                System.out.println("status invalide");
+                return;
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        project.setProjetStatus(newStatus);
+        projectService.updateProjectStatus(project);
+        System.out.println("status de project updated");
+    } else {
+        System.out.println("project not found");
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }

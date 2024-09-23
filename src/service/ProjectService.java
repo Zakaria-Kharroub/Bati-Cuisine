@@ -37,6 +37,22 @@ public class ProjectService {
 //        projectRepository.updateCoutTotalProject(project);
 //    }
 
+    public void updateProjectStatus(Projet project) throws SQLException {
+        projectRepository.updateProjectStatus(project);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
