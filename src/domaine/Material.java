@@ -51,6 +51,13 @@ public class Material extends Composant{
         this.coefficientQualite = coefficientQualite;
     }
 
+    public double calculCoutTotal(){
+        double coutTotalMaterial = this.coutUnitaire * this.quantite * this.coefficientQualite + this.coutTransport ;
+        return  coutTotalMaterial + (coutTotalMaterial * (this.getTauxTva()/100));
+    }
+
+
+
 }
 
 

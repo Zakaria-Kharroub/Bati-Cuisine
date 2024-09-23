@@ -33,4 +33,13 @@ public class ProjectService {
         return projectRepository.getProjectByName(projectName);
     }
 
+//    public void updateProjectCoutTotal(Projet project) throws SQLException {
+//        projectRepository.updateCoutTotalProject(project);
+//    }
+
+
+
+
+
+
 }

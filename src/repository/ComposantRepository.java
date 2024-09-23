@@ -60,63 +60,59 @@ public class ComposantRepository {
     }
 
 
-
-
-    public List<Composant> getComposantsByProjectName(String projectName) throws SQLException {
-        String query = "SELECT c.id, c.name, c.composanttype, c.tauxtva, " +
-                "m.coutUnitaire, m.quantite, m.coutTransport, m.coefficientQualite, " +
-                "d.typeouvrier, d.tauxHoraire, d.heuresTravail, d.productiviteOuvrier " +
-                "FROM composants c " +
-                "LEFT JOIN materials m ON c.id = m.id " +
-                "LEFT JOIN main_douvre d ON c.id = d.id " +
-                "JOIN projects p ON c.project_id = p.id " +
-                "WHERE p.name = ?";
-        List<Composant> composants = new ArrayList<>();
-
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, projectName);
-            try (ResultSet rs = preparedStatement.executeQuery()) {
-                while (rs.next()) {
-                    String composantType = rs.getString("composanttype");
-                    if ("Matériel".equals(composantType)) {
-                        Material material = new Material(
-                                rs.getString("name"),
-                                composantType,
-                                rs.getDouble("tauxtva"),
-                                null,
-                                rs.getDouble("coutUnitaire"),
-                                rs.getDouble("quantite"),
-                                rs.getDouble("coutTransport"),
-                                rs.getDouble("coefficientQualite")
-                        );
-                        composants.add(material);
-                    } else if ("Main d'œuvre".equals(composantType)) {
-                        MainDouvre mainDouvre = new MainDouvre(
-                                rs.getString("name"),
-                                composantType,
-                                rs.getDouble("tauxtva"),
-                                null,
-                                rs.getString("typeouvrier"),
-                                rs.getDouble("tauxHoraire"),
-                                rs.getDouble("heuresTravail"),
-                                rs.getDouble("productiviteOuvrier")
-                        );
-                        composants.add(mainDouvre);
-                    }
-                }
+    public List<Material> getAllMaterialByProjectName(String name){
+        List <Material> materials = new ArrayList<>();
+        try{
+            String query = "SELECT * FROM materials WHERE project_id = (SELECT id FROM projects WHERE name = ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1,name);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                Material material = new Material(
+                        resultSet.getString("name"),
+                        resultSet.getString("composanttype"),
+                        resultSet.getDouble("tauxtva"),
+                        null,
+                        resultSet.getDouble("coutUnitaire"),
+                        resultSet.getDouble("quantite"),
+                        resultSet.getDouble("coutTransport"),
+                        resultSet.getDouble("coefficientQualite")
+                );
+                materials.add(material);
             }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        return composants;
+        return materials;
     }
 
+    public List<MainDouvre> getAllMainDouvreByProjectName(String name){
+        List <MainDouvre> mainDouvreList = new ArrayList<>();
+        try{
+            String query = "SELECT * FROM main_douvre WHERE project_id = (SELECT id FROM projects WHERE name = ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1,name);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                MainDouvre mainDouvre = new MainDouvre(
+                        resultSet.getString("name"),
+                        resultSet.getString("composanttype"),
+                        resultSet.getDouble("tauxtva"),
+                        null,
+                        resultSet.getString("typeouvrier"),
+                        resultSet.getDouble("tauxHoraire"),
+                        resultSet.getDouble("heuresTravail"),
+                        resultSet.getDouble("productiviteOuvrier")
+                );
+                mainDouvreList.add(mainDouvre);
+            }
 
-
-
-
-
-
-
-
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return mainDouvreList;
+    }
 
 
 

@@ -30,7 +30,7 @@ public class Main {
                     manageClients(clientService, inp);
                     break;
                 case 2:
-                    manageProjects(projectService, composanService, inp, clientService); // Update this line
+                    manageProjects(projectService, composanService, inp, clientService);
                     break;
                 case 3:
                     System.out.println("Merci et au revoir");
@@ -87,7 +87,7 @@ public class Main {
             choixProject = projectMenu(inp);
             switch (choixProject) {
                 case 1:
-                    addProject(projectService, inp, clientService);
+                    addProject(projectService,composanService, inp, clientService);
                     break;
                 case 2:
                     detailProject(projectService, composanService, inp);
@@ -131,7 +131,7 @@ public class Main {
         System.out.println("+--------------------------------------------------------------+");
         System.out.println("| 1 - ajouter projet                                           |");
         System.out.println("| 2 - detail projet by name                                    |");
-        System.out.println("| 3 - delete projet                                            |");
+        System.out.println("| 3 - afficher les project existants                           |");
         System.out.println("| 4 - update projet                                            |");
         System.out.println("| 5 - exit                                                     |");
         System.out.println("+--------------------------------------------------------------+");
@@ -241,14 +241,14 @@ public class Main {
 
 
 
-    private static void addProject(ProjectService projectService, Scanner inp, ClientService clientService) throws SQLException {
+    private static void addProject(ProjectService projectService,ComposanService composanService, Scanner inp, ClientService clientService) throws SQLException {
         System.out.println("enter name de projet");
         String projectName = inp.next();
 
         System.out.println("enter name de client pour associer a ce projet");
         String clientName = inp.next();
 
-        System.out.println("enter marge benifit");
+        System.out.println("enter marge benifit en %");
         double margeBenifit = inp.nextDouble();
 
         try {
@@ -271,6 +271,34 @@ public class Main {
             }
 
             System.out.println("Projet ajouté avec succès");
+
+
+            double coutTotalMaterial = composanService.calculCoutTotalMaterial(project.getName());
+            double coutTotalMainDouvre = composanService.calculCoutTotalMainDouvre(project.getName());
+            double coutTotal = coutTotalMaterial + coutTotalMainDouvre;
+
+            double coutTotalAvecMarge = coutTotal + (coutTotal * margeBenifit / 100);
+
+//            project.setCoutTotal(coutTotal);
+//            projectService.updateProjectCoutTotal(project);
+
+            if (client.getIsProfessional()){
+                System.out.println("ce client est professionnel , vous voulez appliquer une remise? \n oui/non");
+                String remise = inp.next().toLowerCase();
+                if (remise.equals("oui")) {
+                    System.out.println("entrer le montant de remise en %");
+                    double montantRemise = inp.nextDouble();
+                    double coutTotalAvecRemise = coutTotalAvecMarge - (coutTotalAvecMarge * montantRemise / 100);
+                }
+            }
+
+            System.out.println(" ------------ Resultat du Calcul --------------");
+            System.out.println("name de projet : " + project.getName());
+            System.out.println("client : " + project.getClient().getName());
+            System.out.println("cout total material : " + coutTotalMaterial);
+            System.out.println("cout total main d'œuvre : " + coutTotalMainDouvre);
+            System.out.println("cout total avec marge : " + coutTotalAvecMarge);
+
         } catch (SQLException e) {
             System.out.println("Erreur lors de l'ajout du projet: " + e.getMessage());
         } catch (IllegalArgumentException e) {
@@ -285,17 +313,17 @@ public class Main {
         System.out.println("enter name de composant");
         String componentName = inp.next();
 
-        System.out.println("enter taux TVA:");
+        System.out.println("enter taux TVA en %:");
         double tauxTva = inp.nextDouble();
 
         if (componentType == 1) {
-            System.out.println("enter le cout unitaire:");
+            System.out.println("enter le cout unitaire en €:");
             double coutUnitaire =inp.nextDouble();
 
             System.out.println("enter la quantite:");
             double quantite= inp.nextDouble();
 
-            System.out.println("enter cout de transport:");
+            System.out.println("enter cout de transport en €:");
             double coutTransport = inp.nextDouble();
 
             System.out.println("Entrez le coefficient de qualité du matériau (1.0 = standard, > 1.0 = haute qualité)");
@@ -325,7 +353,9 @@ public class Main {
 
 
 
-    private static void detailProject(ProjectService projectService, ComposanService composanService, Scanner inp) throws SQLException {
+
+
+    public static void detailProject(ProjectService projectService, ComposanService composanService, Scanner inp) throws SQLException {
         System.out.println("enter name de projet:");
         String projectName = inp.next();
 
@@ -336,27 +366,30 @@ public class Main {
             System.out.println("===============================================================================================");
             System.out.println("Name: " + project.getName() + " |client :" + project.getClient().getName() + " |cout total:" + project.getCoutTotal() + " |status:" + project.getProjetStatus());
 
-
-            List<Composant> composants = composanService.getComposantsByProjectName(projectName);
+            List<Material> materials = composanService.getAllMaterialByProjectName(projectName);
+            if (materials.isEmpty()) {
+                System.out.println("aucun material trouve pour ce projet");
+            }
             System.out.println("======================================= composants =============================================");
-            for (Composant composant : composants) {
-                System.out.println("type : " + composant.getComposantType() + " |name : " + composant.getName() + " |taux TVA : " + composant.getTauxTva());
+            for (Material material : materials) {
+                System.out.println("type : " + material.getComposantType() + " |name : " + material.getName() + " |taux TVA : " + material.getTauxTva());
+                System.out.println("cout Unitaire: " + material.getCoutUnitaire() + " |quatite: " + material.getQuantite() + " |cout de transport: " + material.getCoutTransport() + " |coefficient de qualite: " + material.getCoefficientQualite());
+                System.out.println("--------------------------------------------------------------------------------------------");
+            }
 
-                if (composant instanceof Material) {
-                    Material material = (Material) composant;
-                    System.out.println("cout Unitaire: " + material.getCoutUnitaire() + " |quatite: " + material.getQuantite() + " |cout de transport: " + material.getCoutTransport() + " |coefficient de qualite: " + material.getCoefficientQualite());
-                } else if (composant instanceof MainDouvre) {
-                    MainDouvre mainDouvre = (MainDouvre) composant;
-                    System.out.println("type ouvrier: " + " | taux horaire :" + mainDouvre.getTauxHoraire() + " | heures de travail: " + mainDouvre.getHeuresTravail() + " | productivite ouvrier: " + mainDouvre.getProductiviteOuvrier());
-                }
+            List<MainDouvre> mainDouvre = composanService.getAllMainDouvreByProjectName(projectName);
+            if (mainDouvre.isEmpty()) {
+                System.out.println("aucun main ouvre trouve pour ce projet");
+            }
+            for (MainDouvre mainDouvre1 : mainDouvre) {
+                System.out.println("type : " + mainDouvre1.getComposantType() + " |name : " + mainDouvre1.getName() + " |taux TVA : " + mainDouvre1.getTauxTva());
+                System.out.println("type ouvrier: " + mainDouvre1.getTypeOuvrier() + " | taux horaire :" + mainDouvre1.getTauxHoraire() + " | heures de travail: " + mainDouvre1.getHeuresTravail() + " | productivite ouvrier: " + mainDouvre1.getProductiviteOuvrier());
                 System.out.println("--------------------------------------------------------------------------------------------");
             }
         } else {
             System.out.println("Project not found");
         }
     }
-
-
 
 
 

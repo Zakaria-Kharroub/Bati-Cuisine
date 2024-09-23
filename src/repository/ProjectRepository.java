@@ -7,6 +7,7 @@ import domaine.ProjetStatus;
 import java.beans.JavaBean;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class ProjectRepository {
@@ -16,9 +17,9 @@ public class ProjectRepository {
         this.connection = connection;
     }
     public int addProject(Projet project) throws SQLException {
-        String query= "INSERT INTO projects(name, margeBenifit, coutTotal, projectstatus, client_id) VALUES (?, ?, 0, ?, ?) RETURNING id";
+        String query = "INSERT INTO projects(name, margeBenifit, coutTotal, projectstatus, client_id) VALUES (?, ?, 0, ?, ?) RETURNING id";
 
-        try (PreparedStatement preparedStatement =connection.prepareStatement(query)) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, project.getName());
             preparedStatement.setDouble(2, project.getMargeBenifit());
             preparedStatement.setObject(3, project.getProjetStatus(), java.sql.Types.OTHER);
@@ -32,6 +33,8 @@ public class ProjectRepository {
             }
         }
     }
+
+
 
     public Optional<Projet> getProjectByName(String projectName) throws SQLException {
         String query = "SELECT p.id, p.name, p.margeBenifit, p.coutTotal, p.projectstatus, " +
@@ -72,10 +75,15 @@ public class ProjectRepository {
     }
 
 
-
-
-
-
+//    public void updateCoutTotalProject(Projet project) throws SQLException {
+//        String query = "UPDATE projects SET coutTotal = ? WHERE id = ?";
+//
+//        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+//            preparedStatement.setDouble(1, project.getCoutTotal());
+//            preparedStatement.setInt(2, project.getId());
+//            preparedStatement.executeUpdate();
+//        }
+//    }
 
 
 }

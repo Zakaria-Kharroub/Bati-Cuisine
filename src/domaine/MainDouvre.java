@@ -1,7 +1,6 @@
 package domaine;
 
 public class MainDouvre extends Composant{
-    private int id;
     private String typeOuvrier;
     private double tauxHoraire;
     private double heuresTravail;
@@ -51,6 +50,11 @@ public class MainDouvre extends Composant{
 
     public void setProductiviteOuvrier(double productiviteOuvrier) {
         this.productiviteOuvrier = productiviteOuvrier;
+    }
+
+    public double calculCoutTotal(){
+        double coutTotalMainDouvre = this.tauxHoraire * this.heuresTravail * this.productiviteOuvrier;
+        return coutTotalMainDouvre + (coutTotalMainDouvre * (this.getTauxTva()/100));
     }
 
 
