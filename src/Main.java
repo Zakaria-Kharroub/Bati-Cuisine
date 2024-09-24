@@ -2,9 +2,11 @@ import config.DbConnection;
 import domaine.*;
 import service.ClientService;
 import service.ComposanService;
+import service.DevisService;
 import service.ProjectService;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -30,7 +32,7 @@ public class Main {
                     manageClients(clientService, inp);
                     break;
                 case 2:
-                    manageProjects(projectService, composanService, inp, clientService); // Update this line
+                    manageProjects(projectService, composanService, inp, clientService);
                     break;
                 case 3:
                     System.out.println("Merci et au revoir");
@@ -71,6 +73,9 @@ public class Main {
                     deleteClient(clientService, inp);
                     break;
                 case 5:
+                    updateClient(clientService, inp);
+                    break;
+                case 6:
                     System.out.println("retour au menu principal");
                     break;
                 default:
@@ -87,16 +92,16 @@ public class Main {
             choixProject = projectMenu(inp);
             switch (choixProject) {
                 case 1:
-                    addProject(projectService, inp, clientService);
+                    addProject(projectService,composanService, inp, clientService, new DevisService());
                     break;
                 case 2:
                     detailProject(projectService, composanService, inp);
                     break;
                 case 3:
-                    // delete projet
+                    findAllProjects(projectService);
                     break;
                 case 4:
-                    // update projet
+                    updateProjectStatus(projectService, inp);
                     break;
                 case 5:
                     System.out.println("retour au menu principal");
@@ -105,7 +110,7 @@ public class Main {
                     System.out.println("choix invalide");
                     break;
             }
-        } while (choixProject != 5);
+        } while (choixProject != 6);
     }
 
 
@@ -131,8 +136,8 @@ public class Main {
         System.out.println("+--------------------------------------------------------------+");
         System.out.println("| 1 - ajouter projet                                           |");
         System.out.println("| 2 - detail projet by name                                    |");
-        System.out.println("| 3 - delete projet                                            |");
-        System.out.println("| 4 - update projet                                            |");
+        System.out.println("| 3 - afficher les project existants                           |");
+        System.out.println("| 4 - update projet status                                     |");
         System.out.println("| 5 - exit                                                     |");
         System.out.println("+--------------------------------------------------------------+");
 
@@ -241,14 +246,27 @@ public class Main {
 
 
 
-    private static void addProject(ProjectService projectService, Scanner inp, ClientService clientService) throws SQLException {
+
+
+    private static void findAllProjects(ProjectService projectService) throws SQLException {
+        System.out.println("---------------------------------------------------------------------------------------");
+        System.out.println("                             liste des projects                                       ");
+        List<Projet> projects = projectService.findAllProjects();
+        for (Projet project : projects) {
+            System.out.println("--------------------------------------------------------------------------------------");
+                        System.out.println("id: " + project.getId() + "| name: " + project.getName() + "|client : " + project.getClient().getName() + "| cout total: " + project.getCoutTotal() + "| status: " + project.getProjetStatus());
+
+        }
+        System.out.println("--------------------------------------------------------------------------------------");
+    }
+    private static void addProject(ProjectService projectService, ComposanService composanService, Scanner inp, ClientService clientService, DevisService devisService) throws SQLException {
         System.out.println("enter name de projet");
         String projectName = inp.next();
 
         System.out.println("enter name de client pour associer a ce projet");
         String clientName = inp.next();
 
-        System.out.println("enter marge benifit");
+        System.out.println("enter marge benifit en %");
         double margeBenifit = inp.nextDouble();
 
         try {
@@ -256,27 +274,101 @@ public class Main {
                     () -> new IllegalArgumentException("client not found")
             );
 
-            Projet project =new Projet(projectName, margeBenifit, 0, ProjetStatus.INPROGRESS, client, new ArrayList<>());
+            Projet project = new Projet(projectName, margeBenifit, 0, ProjetStatus.INPROGRESS, client, new ArrayList<>());
             int projectId = projectService.addProject(project);
+            project.setId(projectId);
+            System.out.println("project ajoute avec ID : " + projectId);
 
-            boolean addMoreComposants=true;
+            boolean addMoreComposants = true;
             while (addMoreComposants) {
-                System.out.println("vous voulez ajouter un composant a ce projet ? \n oui/non");
+                System.out.println("vous voulez ajouter composant a ce projet ? \n oui/non");
                 String response = inp.next().toLowerCase();
                 if (response.equals("oui")) {
                     addComposantToProject(projectService, inp, projectId);
                 } else {
-                    addMoreComposants= false;
+                    addMoreComposants = false;
                 }
             }
 
-            System.out.println("Projet ajouté avec succès");
+
+            double coutTotalMaterial = composanService.calculCoutTotalMaterial(project.getName());
+            double coutTotalMainDouvre = composanService.calculCoutTotalMainDouvre(project.getName());
+            double coutTotal = coutTotalMaterial + coutTotalMainDouvre;
+
+            double coutTotalAvecMarge = coutTotal + (coutTotal * margeBenifit / 100);
+
+
+            double coutTotalAvecRemise = 0;
+            if (client.getIsProfessional()) {
+                System.out.println("ce client est professionnel , vous voulez appliquer une remise? \n oui/non");
+                String remise = inp.next().toLowerCase();
+                if (remise.equals("oui")) {
+                    System.out.println("entrer le montant de remise en %");
+                    double montantRemise = inp.nextDouble();
+                    coutTotalAvecRemise = coutTotalAvecMarge - (coutTotalAvecMarge * montantRemise / 100);
+                }
+            }
+//            System.out.println("fffffffffffff  ..|  " + coutTotal);
+            project.setCoutTotal(coutTotal);
+            projectService.updateProjectCoutTotal(project);
+
+            System.out.println(" ------------ Resultat du Calcul --------------");
+            System.out.println("name de projet : " + project.getName());
+            System.out.println("client : " + project.getClient().getName());
+            System.out.println("cout total material : " + coutTotalMaterial);
+            System.out.println("cout total main d'oeuvre : " + coutTotalMainDouvre);
+            System.out.println("cout total avec marge : " + coutTotalAvecMarge);
+
+            System.out.println("cout total avec remise : " + coutTotalAvecRemise);
+
+            System.out.println("---------- generation de devis ----------");
+            inp.nextLine();
+            System.out.println("enter date emission de devis (YYYY-MM-DD):");
+            LocalDate dateEmission = LocalDate.parse(inp.next());
+
+            System.out.println("enter date validite de devis (YYYY-MM-DD):");
+            LocalDate dateValidite = LocalDate.parse(inp.next());
+
+            double montanEstime = coutTotalAvecRemise == 0 ? coutTotalAvecMarge : coutTotalAvecRemise;
+
+            boolean isAccepted = false;
+
+            System.out.println( "------------ Devis----------");
+            System.out.println("name de projet : " + project.getName());
+            System.out.println("client : " + project.getClient().getName());
+            System.out.println("date emission : " + dateEmission);
+            System.out.println("date validite : " + dateValidite);
+            System.out.println("montant estime : " + montanEstime);
+            System.out.println("accepter ce devis? \n oui/non");
+            String response = inp.next().toLowerCase();
+            if (response.equals("oui")) {
+                isAccepted = true;
+            }
+            System.out.println("devis status : " + (isAccepted ? "accepte" : "non accepte"));
+//            System.out.println("-----"+project.getId());
+            Devis devis = new Devis(dateEmission, dateValidite, montanEstime, isAccepted, project);
+            if(devis.isAccept()){
+                project.setProjetStatus(ProjetStatus.FINISHED);
+                projectService.updateProjectStatus(project);
+            }else {
+                project.setProjetStatus(ProjetStatus.CANCELLED);
+                projectService.updateProjectStatus(project);
+            }
+
+            if (project.getId() == 0) {
+                throw new SQLException("devis ne pas ajouter correct, id project manquant.");
+            }
+
+            devisService.saveDevis(devis, project);
+
+
         } catch (SQLException e) {
-            System.out.println("Erreur lors de l'ajout du projet: " + e.getMessage());
+            System.out.println("error : " + e.getMessage());
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
     }
+
 
     private static void addComposantToProject(ProjectService projectService, Scanner inp, int projectId) throws SQLException {
         System.out.println("enter type de composant (1 - materiel, 2 - main d'œuvre):");
@@ -285,17 +377,17 @@ public class Main {
         System.out.println("enter name de composant");
         String componentName = inp.next();
 
-        System.out.println("enter taux TVA:");
+        System.out.println("enter taux TVA en %:");
         double tauxTva = inp.nextDouble();
 
         if (componentType == 1) {
-            System.out.println("enter le cout unitaire:");
+            System.out.println("enter le cout unitaire en €:");
             double coutUnitaire =inp.nextDouble();
 
             System.out.println("enter la quantite:");
             double quantite= inp.nextDouble();
 
-            System.out.println("enter cout de transport:");
+            System.out.println("enter cout de transport en €:");
             double coutTransport = inp.nextDouble();
 
             System.out.println("Entrez le coefficient de qualité du matériau (1.0 = standard, > 1.0 = haute qualité)");
@@ -324,8 +416,7 @@ public class Main {
     }
 
 
-
-    private static void detailProject(ProjectService projectService, ComposanService composanService, Scanner inp) throws SQLException {
+    public static void detailProject(ProjectService projectService, ComposanService composanService, Scanner inp) throws SQLException {
         System.out.println("enter name de projet:");
         String projectName = inp.next();
 
@@ -336,48 +427,103 @@ public class Main {
             System.out.println("===============================================================================================");
             System.out.println("Name: " + project.getName() + " |client :" + project.getClient().getName() + " |cout total:" + project.getCoutTotal() + " |status:" + project.getProjetStatus());
 
-
-            List<Composant> composants = composanService.getComposantsByProjectName(projectName);
+            List<Material> materials = composanService.getAllMaterialByProjectName(projectName);
+            if (materials.isEmpty()) {
+                System.out.println("aucun material trouve pour ce projet");
+            }
             System.out.println("======================================= composants =============================================");
-            for (Composant composant : composants) {
-                System.out.println("type : " + composant.getComposantType() + " |name : " + composant.getName() + " |taux TVA : " + composant.getTauxTva());
-
-                if (composant instanceof Material) {
-                    Material material = (Material) composant;
-                    System.out.println("cout Unitaire: " + material.getCoutUnitaire() + " |quatite: " + material.getQuantite() + " |cout de transport: " + material.getCoutTransport() + " |coefficient de qualite: " + material.getCoefficientQualite());
-                } else if (composant instanceof MainDouvre) {
-                    MainDouvre mainDouvre = (MainDouvre) composant;
-                    System.out.println("type ouvrier: " + " | taux horaire :" + mainDouvre.getTauxHoraire() + " | heures de travail: " + mainDouvre.getHeuresTravail() + " | productivite ouvrier: " + mainDouvre.getProductiviteOuvrier());
-                }
+            for (Material material : materials) {
+                System.out.println("type : " + material.getComposantType() + " |name : " + material.getName() + " |taux TVA : " + material.getTauxTva());
+                System.out.println("cout Unitaire: " + material.getCoutUnitaire() + " |quatite: " + material.getQuantite() + " |cout de transport: " + material.getCoutTransport() + " |coefficient de qualite: " + material.getCoefficientQualite());
                 System.out.println("--------------------------------------------------------------------------------------------");
             }
+
+            List<MainDouvre> mainDouvre = composanService.getAllMainDouvreByProjectName(projectName);
+            if (mainDouvre.isEmpty()) {
+                System.out.println("aucun main ouvre trouve pour ce projet");
+            }
+            for (MainDouvre mainDouvre1 : mainDouvre) {
+                System.out.println("type : " + mainDouvre1.getComposantType() + " |name : " + mainDouvre1.getName() + " |taux TVA : " + mainDouvre1.getTauxTva());
+                System.out.println("type ouvrier: " + mainDouvre1.getTypeOuvrier() + " | taux horaire :" + mainDouvre1.getTauxHoraire() + " | heures de travail: " + mainDouvre1.getHeuresTravail() + " | productivite ouvrier: " + mainDouvre1.getProductiviteOuvrier());
+                System.out.println("--------------------------------------------------------------------------------------------");
+            }
+
+            System.out.println("======================================== calcul cout total =====================================");
+            System.out.println("cout total material: " + composanService.calculCoutTotalMaterial(projectName));
+            System.out.println("cout total main d'œuvre: " + composanService.calculCoutTotalMainDouvre(projectName));
+            System.out.println("cout total: " + project.getCoutTotal());
+            double coutTotalAvecMarge = project.getCoutTotal() + (project.getCoutTotal() * project.getMargeBenifit() / 100);
+            System.out.println("cout total avec marge :" + coutTotalAvecMarge);
+            System.out.println("===============================================================================================");
+
+
+
         } else {
             System.out.println("Project not found");
         }
     }
 
+   public static void updateProjectStatus(ProjectService projectService, Scanner inp) throws SQLException {
+    System.out.println("enter name de projet:");
+    String projectName = inp.next();
 
+    Optional<Projet> projectOpt = projectService.getProjectByName(projectName);
+    if (projectOpt.isPresent()) {
+        Projet project = projectOpt.get();
+        System.out.println("status actuel  projet: " + project.getProjetStatus());
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        System.out.println("entrez nouveau status du projet: \n 1 - INPROGRESS, 2 - FINISHED, 3 - CANCELED");
+        int status = inp.nextInt();
+        ProjetStatus newStatus = null;
+        switch (status) {
+            case 1:
+                newStatus = ProjetStatus.INPROGRESS;
+                break;
+            case 2:
+                newStatus = ProjetStatus.FINISHED;
+                break;
+            case 3:
+                newStatus = ProjetStatus.CANCELLED;
+                break;
+            default:
+                System.out.println("status invalide");
+                return;
+        }
+        project.setProjetStatus(newStatus);
+        projectService.updateProjectStatus(project);
+        System.out.println("status de project updated");
+    } else {
+        System.out.println("project not found");
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    }
