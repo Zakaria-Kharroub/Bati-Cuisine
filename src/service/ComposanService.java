@@ -2,6 +2,7 @@ package service;
 
 import config.DbConnection;
 import domaine.Composant;
+import domaine.MainDouvre;
 import domaine.Material;
 import repository.ComposantRepository;
 
@@ -17,9 +18,33 @@ public class ComposanService {
         this.composantRepository = new ComposantRepository(connection);
     }
 
-    public List<Composant> getComposantsByProjectName(String projectName) throws SQLException {
-        return composantRepository.getComposantsByProjectName(projectName);
+    public double calculCoutTotalMaterial(String name) throws SQLException {
+        List<Material> materialList = composantRepository.getAllMaterialByProjectName(name);
+        double coutTotalMaterial = 0;
+        for (Material material : materialList) {
+            coutTotalMaterial += material.calculCoutTotal();
+        }
+        return coutTotalMaterial;
+
     }
+
+    public double calculCoutTotalMainDouvre(String name) throws SQLException {
+        List<MainDouvre> mainDouvreList = composantRepository.getAllMainDouvreByProjectName(name);
+        double coutTotalMainDouvre = 0;
+        for (MainDouvre mainDouvre : mainDouvreList) {
+            coutTotalMainDouvre += mainDouvre.calculCoutTotal();
+        }
+        return coutTotalMainDouvre;
+    }
+
+    public List<Material> getAllMaterialByProjectName(String name) throws SQLException {
+        return composantRepository.getAllMaterialByProjectName(name);
+    }
+
+    public List<MainDouvre> getAllMainDouvreByProjectName(String name) throws SQLException {
+        return composantRepository.getAllMainDouvreByProjectName(name);
+    }
+
 
 
 

@@ -53,6 +53,9 @@ public class Composant {
         this.projet = projet;
     }
 
+    public double calculCoutTotal(){
+        return 0;
+    }
 
 
 
