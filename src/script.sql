@@ -45,6 +45,7 @@ create table main_douvre(
 create table devis(
                       id SERIAL PRIMARY KEY,
                       project_id INT,
+                      montantEstime DOUBLE PRECISION NOT NULL,
                       dateEmission DATE NOT NULL,
                       dateValidite DATE NOT NULL,
                       isAccept BOOLEAN NOT NULL,

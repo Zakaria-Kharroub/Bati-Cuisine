@@ -33,28 +33,17 @@ public class ProjectService {
         return projectRepository.getProjectByName(projectName);
     }
 
-//    public void updateProjectCoutTotal(Projet project) throws SQLException {
-//        projectRepository.updateCoutTotalProject(project);
-//    }
+    public void updateProjectCoutTotal(Projet project) throws SQLException {
+        projectRepository.updateCoutTotalProject(project);
+    }
 
     public void updateProjectStatus(Projet project) throws SQLException {
         projectRepository.updateProjectStatus(project);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public List<Projet> findAllProjects() throws SQLException {
+        return projectRepository.findAllProjects();
+    }
 
 
 
