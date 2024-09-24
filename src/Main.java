@@ -4,6 +4,7 @@ import service.ClientService;
 import service.ComposanService;
 import service.DevisService;
 import service.ProjectService;
+import validation.ValidateInputs;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -23,6 +24,8 @@ public class Main {
         ProjectService projectService = new ProjectService();
         ComposanService composanService = new ComposanService();
         Scanner inp = new Scanner(System.in);
+
+
 
         int choix;
         do {
@@ -138,7 +141,7 @@ public class Main {
         System.out.println("| 2 - detail projet by name                                    |");
         System.out.println("| 3 - afficher les project existants                           |");
         System.out.println("| 4 - update projet status                                     |");
-        System.out.println("| 5 - exit                                                     |");
+        System.out.println("| 5 - retour au menu principal                                 |");
         System.out.println("+--------------------------------------------------------------+");
 
         return inp.nextInt();
@@ -244,10 +247,6 @@ public class Main {
         }
     }
 
-
-
-
-
     private static void findAllProjects(ProjectService projectService) throws SQLException {
         System.out.println("---------------------------------------------------------------------------------------");
         System.out.println("                             liste des projects                                       ");
@@ -266,8 +265,7 @@ public class Main {
         System.out.println("enter name de client pour associer a ce projet");
         String clientName = inp.next();
 
-        System.out.println("enter marge benifit en %");
-        double margeBenifit = inp.nextDouble();
+        double margeBenifit = ValidateInputs.validateDouble("enter marge benifit en %");
 
         try {
             Client client = clientService.findByname(clientName).orElseThrow(
@@ -303,8 +301,8 @@ public class Main {
                 System.out.println("ce client est professionnel , vous voulez appliquer une remise? \n oui/non");
                 String remise = inp.next().toLowerCase();
                 if (remise.equals("oui")) {
-                    System.out.println("entrer le montant de remise en %");
-                    double montantRemise = inp.nextDouble();
+
+                    double montantRemise = ValidateInputs.validateDouble("entrer le montant de remise en %");
                     coutTotalAvecRemise = coutTotalAvecMarge - (coutTotalAvecMarge * montantRemise / 100);
                 }
             }
@@ -377,21 +375,17 @@ public class Main {
         System.out.println("enter name de composant");
         String componentName = inp.next();
 
-        System.out.println("enter taux TVA en %:");
-        double tauxTva = inp.nextDouble();
+
+        double tauxTva = ValidateInputs.validateDouble("enter taux TVA en %");
 
         if (componentType == 1) {
-            System.out.println("enter le cout unitaire en €:");
-            double coutUnitaire =inp.nextDouble();
+            double coutUnitaire =ValidateInputs.validateDouble("enter cout unitaire en €");
 
-            System.out.println("enter la quantite:");
-            double quantite= inp.nextDouble();
+            double quantite= ValidateInputs.validateDouble("enter quantite");
 
-            System.out.println("enter cout de transport en €:");
-            double coutTransport = inp.nextDouble();
+            double coutTransport = ValidateInputs.validateDouble("enter cout de transport en €");
 
-            System.out.println("Entrez le coefficient de qualité du matériau (1.0 = standard, > 1.0 = haute qualité)");
-            double coefficientQualite = inp.nextDouble();
+            double coefficientQualite = ValidateInputs.validateDouble("Entrez le coefficient de qualité du matériau (1.0 = standard, > 1.0 = haute qualité)");
 
             Material material = new Material(componentName, "Matériel", tauxTva, null, coutUnitaire, quantite, coutTransport, coefficientQualite);
             projectService.addComposantToProject(projectId, material);
@@ -399,14 +393,11 @@ public class Main {
             System.out.println("enter type d'ouvrier (1 - ouvrier de base, 2 - specialiste):");
             String typeOuvrier = inp.nextInt() == 1 ? "ouvrier de base" : "spécialiste";
 
-            System.out.println("enter taux horaire:");
-            double tauxHoraire = inp.nextDouble();
+            double tauxHoraire = ValidateInputs.validateDouble("enter taux horaire en €");
 
-            System.out.println("enter nombre d'heures de travail:");
-            double heuresTravail = inp.nextDouble();
+            double heuresTravail = ValidateInputs.validateDouble("enter nombre heures de travail");
 
-            System.out.println("Entrez le facteur de productivité (1.0 = standard, > 1.0 = haute productivité)");
-            double productiviteOuvrier = inp.nextDouble();
+            double productiviteOuvrier = ValidateInputs.validateDouble("Entrez le facteur de productivité (1.0 = standard, > 1.0 = haute productivité)");
 
             MainDouvre mainDouvre = new MainDouvre(componentName, "Main d'œuvre", tauxTva, null, typeOuvrier, tauxHoraire, heuresTravail, productiviteOuvrier);
             projectService.addComposantToProject(projectId, mainDouvre);
@@ -432,21 +423,23 @@ public class Main {
                 System.out.println("aucun material trouve pour ce projet");
             }
             System.out.println("======================================= composants =============================================");
-            for (Material material : materials) {
-                System.out.println("type : " + material.getComposantType() + " |name : " + material.getName() + " |taux TVA : " + material.getTauxTva());
-                System.out.println("cout Unitaire: " + material.getCoutUnitaire() + " |quatite: " + material.getQuantite() + " |cout de transport: " + material.getCoutTransport() + " |coefficient de qualite: " + material.getCoefficientQualite());
-                System.out.println("--------------------------------------------------------------------------------------------");
-            }
+            materials.stream()
+                    .forEach(material -> {
+                        System.out.println("type : " + material.getComposantType() + " |name : " + material.getName() + " |taux TVA : " + material.getTauxTva());
+                        System.out.println("cout Unitaire: " + material.getCoutUnitaire() + " |quatite: " + material.getQuantite() + " |cout de transport: " + material.getCoutTransport() + " |coefficient de qualite: " + material.getCoefficientQualite());
+                        System.out.println("--------------------------------------------------------------------------------------------");
+                    });
 
-            List<MainDouvre> mainDouvre = composanService.getAllMainDouvreByProjectName(projectName);
-            if (mainDouvre.isEmpty()) {
+            List<MainDouvre> mainDouvres = composanService.getAllMainDouvreByProjectName(projectName);
+            if (mainDouvres.isEmpty()) {
                 System.out.println("aucun main ouvre trouve pour ce projet");
             }
-            for (MainDouvre mainDouvre1 : mainDouvre) {
-                System.out.println("type : " + mainDouvre1.getComposantType() + " |name : " + mainDouvre1.getName() + " |taux TVA : " + mainDouvre1.getTauxTva());
-                System.out.println("type ouvrier: " + mainDouvre1.getTypeOuvrier() + " | taux horaire :" + mainDouvre1.getTauxHoraire() + " | heures de travail: " + mainDouvre1.getHeuresTravail() + " | productivite ouvrier: " + mainDouvre1.getProductiviteOuvrier());
-                System.out.println("--------------------------------------------------------------------------------------------");
-            }
+            mainDouvres.stream()
+                    .forEach(mainDouvre -> {
+                        System.out.println("type : " + mainDouvre.getComposantType() + " |name : " + mainDouvre.getName() + " |taux TVA : " + mainDouvre.getTauxTva());
+                        System.out.println("type ouvrier: " + mainDouvre.getTypeOuvrier() + " | taux horaire :" + mainDouvre.getTauxHoraire() + " | heures de travail: " + mainDouvre.getHeuresTravail() + " | productivite ouvrier: " + mainDouvre.getProductiviteOuvrier());
+                        System.out.println("--------------------------------------------------------------------------------------------");
+                    });
 
             System.out.println("======================================== calcul cout total =====================================");
             System.out.println("cout total material: " + composanService.calculCoutTotalMaterial(projectName));
@@ -496,29 +489,6 @@ public class Main {
         System.out.println("project not found");
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
