@@ -1,15 +1,45 @@
 package validation;
 
+import java.util.Scanner;
+
 public class ValidateInputs {
 
-    public static boolean validateDate(String date) {
-        return date.matches("^\\d{4}-\\d{2}-\\d{2}$");
-    }
-    public boolean validateDouble(String number) {
-        return number.matches("^\\d+(\\.\\d+)?$");
+    public static Scanner scanner = new Scanner(System.in);
+
+    public static double validateDouble(String message) {
+        double number = 0;
+        boolean isValid = false;
+        while (!isValid) {
+            System.out.println(message);
+            try {
+                number = Double.parseDouble(scanner.nextLine());
+                isValid = true;
+            } catch (NumberFormatException e) {
+                System.out.println("please enter nombre valid");
+            }
+        }
+        return number;
     }
 
-    public boolean validateBoolean(String bool) {
-        return bool.matches("true|false");
+    public static boolean validateBoolean(String message) {
+        boolean value = false;
+        boolean isValid = false;
+        System.out.println(message);
+        while (!isValid) {
+            try {
+                value = Boolean.parseBoolean(scanner.nextLine());
+                isValid = true;
+            } catch (NumberFormatException e) {
+                System.out.println("please enter true or false");
+            }
+        }
+        return value;
     }
+
+
+
+
+
+
+
 }
