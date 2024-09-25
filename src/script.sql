@@ -14,7 +14,7 @@ CREATE TABLE projects (
                           coutTotal DOUBLE PRECISION NOT NULL,
 
                           projectStatus project_status NOT NULL,
-                          client_id INTEGER REFERENCES clients(id) ON DELETE SET NULL
+                          client_id INTEGER REFERENCES clients(id) ON DELETE CASCADE
 );
 
 create table composants (
@@ -50,4 +50,4 @@ create table devis(
                       dateValidite DATE NOT NULL,
                       isAccept BOOLEAN NOT NULL,
                       FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
-)
+);

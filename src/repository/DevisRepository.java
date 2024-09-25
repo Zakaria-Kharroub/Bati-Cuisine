@@ -1,15 +1,15 @@
 package repository;
 
 import domaine.Devis;
+import repository.interfaces.DevisInterface;
 
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
-public class DevisRepository {
+
+public class DevisRepository implements DevisInterface {
 
     private Connection connection;
 
@@ -29,13 +29,6 @@ public void saveDevis(Devis devis) throws SQLException {
         preparedStatement.executeUpdate();
     }
 }
-
-
-
-
-
-
-
 
 
 }

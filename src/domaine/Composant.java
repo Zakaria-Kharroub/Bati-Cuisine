@@ -1,6 +1,6 @@
 package domaine;
 
-public class Composant {
+public abstract class Composant {
 
     private int id;
     private String name;
@@ -53,9 +53,7 @@ public class Composant {
         this.projet = projet;
     }
 
-    public double calculCoutTotal(){
-        return 0;
-    }
+    public abstract double calculCoutTotal();
 
 
 
