@@ -3,6 +3,7 @@ package repository;
 import domaine.Composant;
 import domaine.MainDouvre;
 import domaine.Material;
+import repository.interfaces.ComposantInterface;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,13 +12,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ComposantRepository {
+public class ComposantRepository implements ComposantInterface {
 
     private Connection connection;
     public ComposantRepository(Connection connection){
         this.connection = connection;
     }
-
 
     public void addComposant(Composant composant, int project_id) throws SQLException {
         if (composant instanceof Material) {
@@ -27,7 +27,7 @@ public class ComposantRepository {
         }
     }
 
-    private void addMaterial(Material material, int project_id) throws SQLException {
+    public void addMaterial(Material material, int project_id) throws SQLException {
         String query = "INSERT INTO materials(name, composanttype, tauxtva, project_id, coutUnitaire, quantite, coutTransport, coefficientQualite) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
@@ -43,7 +43,7 @@ public class ComposantRepository {
         }
     }
 
-    private void addMainDouvre(MainDouvre mainDouvre, int project_id) throws SQLException {
+    public void addMainDouvre(MainDouvre mainDouvre, int project_id) throws SQLException {
         String query = "INSERT INTO main_douvre(name, composanttype, tauxtva, project_id,typeouvrier, tauxHoraire, heuresTravail, productiviteOuvrier) VALUES(?,? ,?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {

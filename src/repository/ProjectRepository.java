@@ -3,6 +3,7 @@ package repository;
 import domaine.Client;
 import domaine.Projet;
 import domaine.ProjetStatus;
+import repository.interfaces.ProjectInterface;
 
 import java.beans.JavaBean;
 import java.sql.*;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ProjectRepository {
+public class ProjectRepository implements ProjectInterface {
     private Connection connection;
 
     public ProjectRepository(Connection connection){

@@ -147,7 +147,7 @@ public class Main {
         return inp.nextInt();
     }
 
-    private static void addClient(ClientService clientService, Scanner inp) throws SQLException {
+    private static void addClient(ClientService clientService, Scanner inp) {
         System.out.println("enter name de client");
         String name = inp.next();
 
@@ -163,8 +163,7 @@ public class Main {
                 System.out.println("entrer address");
                 String address = inp.nextLine();
 
-                System.out.println("ce client est professionnel? \n true / false");
-                boolean isProfessional = inp.nextBoolean();
+                boolean isProfessional = ValidateInputs.validateBoolean("ce client est professionnel? \n true / false");
 
                 clientService.addClient(name, phone, address, isProfessional);
                 System.out.println(name + " ajoute avec succes");
@@ -187,7 +186,7 @@ public class Main {
         System.out.println("--------------------------------------------------------------------------------------");
     }
 
-    private static void detailClientByname(ClientService clientService, Scanner inp) throws SQLException {
+    private static void detailClientByname(ClientService clientService, Scanner inp){
         System.out.println("entrer name de client");
         String nameClient = inp.next();
         try {
@@ -204,7 +203,7 @@ public class Main {
         }
     }
 
-    private static void deleteClient(ClientService clientService, Scanner inp) throws SQLException {
+    private static void deleteClient(ClientService clientService, Scanner inp) {
         System.out.println("enter name de client que vous voulez supprimer");
         String nameDelete = inp.next();
         try {
@@ -217,7 +216,7 @@ public class Main {
         } catch (SQLException e) {System.out.println("error de suppression");}
     }
 
-    private static void updateClient(ClientService clientService, Scanner inp) throws SQLException {
+    private static void updateClient(ClientService clientService, Scanner inp) {
         System.out.println("enter name de client vous voulez modifier");
         String nameUpdate = inp.next();
 
@@ -232,8 +231,7 @@ public class Main {
         System.out.println("enter nouveau address");
         String nouvAddress = inp.nextLine();
 
-        System.out.println("ce client est un professionnel? \n true / false");
-        boolean nouvIsProfessional = inp.nextBoolean();
+        boolean nouvIsProfessional = ValidateInputs.validateBoolean("ce client est professionnel? \n true / false");
 
         try {
             boolean isUpdate = clientService.updateClient(nameUpdate, nouvName, nouvPhone, nouvAddress, nouvIsProfessional);
@@ -258,7 +256,7 @@ public class Main {
         }
         System.out.println("--------------------------------------------------------------------------------------");
     }
-    private static void addProject(ProjectService projectService, ComposanService composanService, Scanner inp, ClientService clientService, DevisService devisService) throws SQLException {
+    private static void addProject(ProjectService projectService, ComposanService composanService, Scanner inp, ClientService clientService, DevisService devisService) {
         System.out.println("enter name de projet");
         String projectName = inp.next();
 
