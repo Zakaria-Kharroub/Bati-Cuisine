@@ -52,6 +52,7 @@ public class MainDouvre extends Composant{
         this.productiviteOuvrier = productiviteOuvrier;
     }
 
+    @Override
     public double calculCoutTotal(){
         double coutTotalMainDouvre = this.tauxHoraire * this.heuresTravail * this.productiviteOuvrier;
         return coutTotalMainDouvre + (coutTotalMainDouvre * (this.getTauxTva()/100));
