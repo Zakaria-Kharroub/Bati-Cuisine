@@ -1,5 +1,7 @@
 package validation;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class ValidateInputs {
@@ -37,6 +39,43 @@ public class ValidateInputs {
         return value;
     }
 
+public static LocalDate validateDateEmission(String message) {
+    LocalDate dateEmission = null;
+    boolean isValid = false;
+    while (!isValid) {
+        System.out.println(message);
+        try {
+            dateEmission = LocalDate.parse(scanner.nextLine());
+            if (!dateEmission.isBefore(LocalDate.now())) {
+                isValid = true;
+            } else {
+                System.out.println("la date obligatoire de superieur ou egal date now.");
+            }
+        } catch (DateTimeParseException e) {
+            System.out.println("please cette date au format YYYY-MM-DD.");
+        }
+    }
+    return dateEmission;
+}
+
+    public static LocalDate validateDateValidite(String message, LocalDate dateEmission) {
+        LocalDate dateValidite = null;
+        boolean isValid = false;
+        while (!isValid) {
+            System.out.println(message);
+            try {
+                dateValidite = LocalDate.parse(scanner.nextLine());
+                if (dateValidite.isAfter(dateEmission)) {
+                    isValid = true;
+                } else {
+                    System.out.println("la date validite doit etre superieur a la date emission.");
+                }
+            } catch (DateTimeParseException e) {
+                System.out.println("please cette date au format YYYY-MM-DD.");
+            }
+        }
+        return dateValidite;
+    }
 
 
 

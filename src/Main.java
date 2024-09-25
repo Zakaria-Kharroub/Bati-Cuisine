@@ -319,11 +319,11 @@ public class Main {
 
             System.out.println("---------- generation de devis ----------");
             inp.nextLine();
-            System.out.println("enter date emission de devis (YYYY-MM-DD):");
-            LocalDate dateEmission = LocalDate.parse(inp.next());
 
-            System.out.println("enter date validite de devis (YYYY-MM-DD):");
-            LocalDate dateValidite = LocalDate.parse(inp.next());
+            LocalDate dateEmission = ValidateInputs.validateDateEmission("enter date emission de devis (YYYY-MM-DD)");
+            inp.nextLine();
+
+            LocalDate dateValidite = ValidateInputs.validateDateValidite("enter date validite de devis (YYYY-MM-DD):", dateEmission);
 
             double montanEstime = coutTotalAvecRemise == 0 ? coutTotalAvecMarge : coutTotalAvecRemise;
 
