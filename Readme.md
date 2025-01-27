@@ -4,6 +4,12 @@
 
 BatiCuisine Application is a command-line Java application designed for professionals in the kitchen construction and renovation industry. It calculates the total cost of projects, considering both materials and labor, providing detailed cost estimations. The app also features client management, project tracking, and invoice generation.
 
+---
+
+![Thumbnail 1](https://github.com/Zakaria-Kharroub/Bati-Cuisine/blob/2cd1c52466e80da8460de520c1e59135770c6d16/baticuisine.png)
+
+---
+
 ## Features
 
 - **Client Management:** Add, update, and manage client data (professionals or individuals).
